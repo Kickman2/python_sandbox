@@ -41,7 +41,7 @@ def generate_certificate_request(common_name, path, multi=False):
 
 
     with open(key_file, "wb") as keyfile:
-        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher=b'AES-256-CBC', passphrase=key_passphrase.encode()))
+        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher="aes-256-cbc", passphrase=key_passphrase.encode()))
 
     with open(csr_file, "wb") as csrfile:
         csrfile.write(crypto.dump_certificate_request(crypto.FILETYPE_PEM, req))
@@ -77,7 +77,7 @@ def generate_self_signed_certificate(common_name, path, multi=False):
 
 
     with open(key_file, "wb") as keyfile:
-        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher=b'AES-256-CBC', passphrase=key_passphrase.encode()))
+        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher="aes-256-cbc", passphrase=key_passphrase.encode()))
 
     with open(crt_file, "wb") as crtfile:
         crtfile.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
@@ -113,7 +113,7 @@ def generate_certificate_with_ca(common_name, path , ca_key_file, ca_crt_file, m
 
 
     with open(key_file, "wb") as keyfile:
-        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher=b'AES-256-CBC', passphrase=key_passphrase.encode()))
+        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher="aes-256-cbc", passphrase=key_passphrase.encode()))
 
     with open(crt_file, "wb") as crtfile:
         crtfile.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert))
@@ -123,19 +123,19 @@ if __name__ == "__main__":
 
     if option == "1":
         common_name = input("Enter the common name for the certificate: ")
-        path = input("Enter output path")
+        path = input("Enter output path: ")
         generate_certificate_request(common_name, path)
     elif option == "2":
         common_name = input("Enter the common name for the certificate: ")
-        path = input("Enter output path")
+        path = input("Enter output path: ")
         generate_certificate_request(common_name, path, multi=True)
     elif option == "3":
         common_name = input("Enter the common name for the certificate: ")
-        path = input("Enter output path")
+        path = input("Enter output path: ")
         generate_self_signed_certificate(common_name, path)
     elif option == "4":
         common_name = input("Enter the common name for the certificate: ")
-        path = input("Enter output path")
+        path = input("Enter output path: ")
         ca_key_file = input("Enter the CA key file name (e.g., ca.key): ")
         ca_crt_file = input("Enter the CA certificate file name (e.g., ca.crt): ")
         generate_certificate_with_ca(common_name, path, ca_key_file, ca_crt_file)
