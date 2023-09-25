@@ -1,0 +1,6 @@
+python_cert_gen/web_version/__pycache__
+python_cert_gen/web_version/csr_database.db
+python_cert_gen/web_version/csr_env
+python_cert_gen/__pycache__
+python_cert_gen/csr_database.db
+python_cert_gen/csr_env

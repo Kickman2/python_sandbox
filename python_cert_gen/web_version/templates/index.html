@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>CSR Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <style>
+        body {
+            background-color: #f3f3f3;
+        }
+
+        form[name='csr_data'] {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            height: 60px;
+        }
+
+        .form-check {
+            height: 30px;
+        }
+    </style>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes">
+         {% for message in messages %}
+          <div class="message_flash">{{ message }}</div>
+         {% endfor %}
+     </ul>
+   {% endif %}
+   {% endwith %}
+</head>
+
+<body>
+    <div class="pb-4">
+    <ul class="nav nav-tabs">
+        <li class="nav-item" style="color: #f3f3f3;">
+            <a class="nav-link navbar-brand text-dark" href="#">CSR Generator</a>  
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark active" href="{{ url_for('index')}}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-dark" href="{{ url_for('csr_list')}}">CSR List</a>
+      </ul>
+    </div>
+
+    <div class="container">
+        <form name="csr_data" method="POST" action="/generate_csr">
+            <div class="form-group ">
+                <label for="unique">Request Name:</label>
+                <input type="text" name="unique" class="form-control" required><br>
+            </div>
+            <div class="form-group">
+                <label for="common_name">Common Name:</label>
+                <input type="text" name="common_name" class="form-control" required><br>
+            </div>
+            <div class="form-group">
+                <label for="env">Env:</label>
+                <input type="text" name="env" class="form-control" required><br>
+            </div>
+            <div class="form-group">
+                <label for="passphase">Passphase:</label>
+                <input type="password" name="passphase" class="form-control"><br>
+            </div>
+            <div class="form-group form-check">
+                <input type="checkbox" name="multi" value="true" class="form-check-input">
+                <label for="multi">Multiple Domain?</label><br>
+            </div>
+            <div class="form-group">
+                <label for="domains">Enter multiple domains separated by commas:</label>
+                <input type="text" name="domains" class="form-control"><br>
+            </div>
+            <input type="submit" class="btn btn-primary" value="Generate Certificate Request">
+    </div>
+    </form>
+    </div>
+
+</body>
+
+</html>

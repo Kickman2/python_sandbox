@@ -1,0 +1,16 @@
+blinker
+cffi
+click
+colorama
+cryptography
+distlib
+filelock
+Flask
+Flask-HTTPAuth
+itsdangerous
+Jinja2
+MarkupSafe
+platformdirs
+pycparser
+pyOpenSSL
+Werkzeug

@@ -13,11 +13,11 @@ def on_closing():
 def set_attribute(subj, common_name):
     subj.CN = common_name
     subj.C = "SG"
-    subj.ST = "example"
-    subj.L = "example"
-    subj.O = "example ltd"
-    subj.OU = "exampleou"
-    subj.emailAddress = "cert_admin@example.com"
+    subj.ST = "Singapore" 
+    subj.L = "Singapore"
+    subj.O = "Singapore Life Ltd"
+    subj.OU = "singlife"
+    subj.emailAddress = "cert_admin@singlife.com"
     return subj
 
 def browse_output_path():
@@ -67,7 +67,8 @@ def generate_certificate_request_gui():
     cert.set_pubkey(req.get_pubkey())
     cert.sign(key, "sha256")
 
-    key_data = crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher="aes-256-cbc", passphrase=key_passphrase.encode())
+    key_data = crypto.dump_privatekey(crypto.FILETYPE_PEM, key)
+    # key_data = crypto.dump_privatekey(crypto.FILETYPE_PEM, key, cipher="AES-256-CBC", passphrase=key_passphrase.encode())
     csr_data = crypto.dump_certificate_request(crypto.FILETYPE_PEM, req)
     with open(key_file, "wb") as keyfile:
         keyfile.write(key_data)
