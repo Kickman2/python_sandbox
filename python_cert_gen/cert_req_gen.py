@@ -13,11 +13,11 @@ def on_closing():
 def set_attribute(subj, common_name):
     subj.CN = common_name
     subj.C = "SG"
-    subj.ST = "Singapore" 
-    subj.L = "Singapore"
-    subj.O = "Singapore Life Ltd"
-    subj.OU = "singlife"
-    subj.emailAddress = "cert_admin@singlife.com"
+    subj.ST = "Example" 
+    subj.L = "Example"
+    subj.O = "Example Life Ltd"
+    subj.OU = "exampleou"
+    subj.emailAddress = "cert_admin@example.com"
     return subj
 
 def browse_output_path():

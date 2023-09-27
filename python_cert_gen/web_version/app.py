@@ -1,4 +1,5 @@
 import base64
+import uuid
 import hashlib
 import os
 import time
@@ -20,17 +21,54 @@ def get_pass():
         lines = file.readlines()
         return base64.b64decode(lines[0]).decode('utf-8')
 
-print(get_pass())
+# print(get_pass())
 users = {
     "admin": generate_password_hash(get_pass()),
 }
 
+print(get_pass())
+@auth.get_user_roles
+def get_user_roles(user):
+    if user.username == 'guest':
+        return ['guest']
+    else:
+        return ['admin','guest']
+        
+
+def check_otp(password):
+    passhash = hashlib.md5(password.encode())
+    record = csr_database.get_guest_otp(passhash.hexdigest())
+    if  record is not None:
+        current_time = int(time.time())
+        if current_time < record[1]:
+            return True
+    else:
+        return False
+    
+
+def check_login(username, password):
+    record = csr_database.get_user_pass(username)
+    passhash = hashlib.md5(password.encode()).hexdigest()
+    if record is not None:
+        if passhash == record[0]:
+            print("checkning user")
+            return True
+    else:
+        return False
+
 
 @auth.verify_password
 def verify_password(username, password):
-    if username in users:
+    if username == 'guest':
+        return check_otp(password)
+    elif check_login(username,password):
+        print("user ok")
+        return True
+    elif username in users:
         return check_password_hash(users.get(username), password)
-    return False
+    else: 
+        return False
+
 
 def set_attribute(subj, common_name):
     subj.CN = common_name
@@ -43,12 +81,12 @@ def set_attribute(subj, common_name):
     return subj
 
 @app.route('/')
-@auth.login_required
+@auth.login_required(role='admin')
 def index():
     return render_template('index.html')
 
 @app.route('/generate_csr', methods=['POST'])
-@auth.login_required
+@auth.login_required(role='admin')
 def generate_certificate():
     # Extract form data and generate the certificate here
     # Update this function with your certificate generation logic
@@ -130,8 +168,54 @@ CN={subj.CN}
     flash(f'Certificate request for "{common_name}" generated successfully', 'success')
     return redirect(url_for('index'))
 
+# @app.route('/generate_certificate', methods=['POST'])
+# @auth.login_required(role='admin')
+# def generate_certificate(unique,common_name, env, key_data, ca_data, csr_data):
+#     common_name = request.form.get('common_name')
+#     env = request.form.get('env')
+#     unique = request.form.get('unique')
+
+#     sign_key = crypto.load_certificate(crypto.FILETYPE_PEM, key_data)
+#     sign_ca = crypto.load_certificate(crypto.FILETYPE_PEM, key_data)
+
+#     key = crypto.PKey()
+#     key.generate_key(crypto.TYPE_RSA, 2048)
+
+#     req = crypto.X509Req()
+#     subj = req.get_subject()
+#     subj = set_attribute(subj, common_name)
+
+#     req.set_pubkey(key)
+
+#     req.sign(key, "sha256")
+
+#     cert = crypto.X509()
+#     cert.set_serial_number(1000)
+#     cert.set_issuer(req.get_subject())
+#     cert.set_subject(req.get_subject())
+#     cert.set_pubkey(req.get_pubkey())
+#     cert.sign(key, "sha256")
+
+@app.route('/user_list', methods=['GET'])
+@auth.login_required(role='admin')
+def user_list():
+    page = request.args.get('page', 1, type=int)
+    total_pages, users_data = load_users(page)
+    page_label = f"Page {page} of {total_pages}"
+
+    return render_template('user_list.html', users_data=users_data, page=page, total_pages=total_pages, page_label=page_label)
+
+def load_users(page_number):
+    page_size = 20  # Number of certificates to display per page
+    total_user = csr_database.get_total_users_count()
+    total_pages = (total_user + page_size - 1) // page_size
+    users_data = csr_database.get_users(page_number, page_size)
+    return total_pages,users_data
+
+
+
 @app.route('/csr_list', methods=['GET'])
-@auth.login_required
+@auth.login_required(role='admin')
 def csr_list():
     page = request.args.get('page', 1, type=int)
     total_pages, csr_data = load_certificates(page)
@@ -146,8 +230,9 @@ def load_certificates(page_number):
     csr_data = csr_database.get_certificates(page_number, page_size)
     return total_pages,csr_data
 
+
 @app.route('/generate_link_csr/<int:csr_id>/<type>', methods=['GET'])
-@auth.login_required
+@auth.login_required(role='admin')
 def generate_link(csr_id,type):
     record = csr_database.get_certificate_by_id(csr_id)
     
@@ -159,26 +244,32 @@ def generate_link(csr_id,type):
 
     token = hashlib.sha256(os.urandom(32)).hexdigest()
 
-    expiration_time = int(time.time()) + 259200  # 1 hour expiration (adjust as needed)
+    expiration_time = int(time.time()) + 10800  # 3 hour expiration (adjust as needed)
     # session[token] = {
     #     'token': token,
     #     'data': data,
     #     'expiration_time': expiration_time,
     # }
-    csr_database.insert_tokens(record[0],token,data,expiration_time)
+    otp = str(uuid.uuid4())[:8]
+    hashed_otp = hashlib.md5(otp.encode())
+    print(hashed_otp.hexdigest())
+    csr_database.insert_tokens(record[0],token,data, hashed_otp.hexdigest(),expiration_time)
     hostname = urlparse(request.base_url).hostname
     url = base64.b64encode(bytes(f'http://{hostname}:5000/download_key/{token}/{record[0]}/{type}', 'utf-8'))
+    otp = base64.b64encode(bytes(otp, 'utf-8'))
 
-    return redirect(url_for('show_link', url=url))
+    return redirect(url_for('show_link', url=url, otp=otp))
 
 @app.route('/show_link')
-@auth.login_required
+@auth.login_required(role='admin')
 def show_link():    
     url = base64.b64decode(request.args.get('url')).decode('utf-8')
-    return render_template('show_link.html', url=url)
+    otp = base64.b64decode(request.args.get('otp')).decode('utf-8')
+    return render_template('show_link.html', url=url, otp=otp)
 
 
 @app.route('/download_key/<token>/<common_name>/<type>', methods=['GET'])
+@auth.login_required(role='guest')
 def download_key(token,common_name,type):
     download_info = csr_database.get_token_data(token)
     if download_info is None:
@@ -197,9 +288,31 @@ def download_key(token,common_name,type):
             return response
         
 @app.route('/delete_csr/<int:csr_id>')        
+@auth.login_required(role='admin')
 def delete_csr(csr_id):
     csr_database.delete_certificate_by_id(csr_id)
     return redirect(request.referrer)
+
+@app.route('/delete_user/<int:user_id>')        
+@auth.login_required(role='admin')
+def delete_user(user_id):
+    csr_database.delete_user_by_id(user_id)
+    return redirect(request.referrer)
+
+@app.route('/add_user')        
+@auth.login_required(role='admin')
+def add_user():
+    return render_template('user_add.html')
+
+@app.route('/adding_user', methods=['POST'])        
+@auth.login_required(role='admin')
+def adding_user():
+    username = request.form.get('username')
+    password = hashlib.md5(request.form['passphase'].encode()).hexdigest()
+    csr_database.insert_user(username, password)
+    flash(f'User "{username}" added successfully', 'success')
+    return redirect(url_for('add_user'))
+
 
     
 @app.route('/download_file/<int:csr_id>/<type>')        
@@ -217,6 +330,10 @@ def download_file(csr_id,type):
         response = make_response(data)
         response.headers["Content-Disposition"] = f"attachment; filename={record[0]}.{type}"
         return response
-            
+
+@app.route('/logout')
+def Logout():
+        return "Logout", 401
+
 if __name__ == '__main__':
     app.run(debug=True)

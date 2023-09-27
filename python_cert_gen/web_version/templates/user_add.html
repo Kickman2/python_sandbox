@@ -54,7 +54,7 @@
                 <a class="nav-link navbar-brand text-dark" href="#">CSR Generator</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-dark active" href="{{ url_for('index')}}">Home</a>
+                <a class="nav-link text-dark" href="{{ url_for('index')}}">Home</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-dark" href="{{ url_for('csr_list')}}">CSR List</a>
@@ -66,32 +66,16 @@
     </div>
 
     <div class="container">
-        <form name="csr_data" method="POST" action="/generate_csr">
+        <form name="csr_data" method="POST" action="/adding_user">
             <div class="form-group ">
-                <label for="unique">Request Name:</label>
-                <input type="text" name="unique" class="form-control" required><br>
+                <label for="username">User Name:</label>
+                <input type="text" name="username" class="form-control" required><br>
             </div>
             <div class="form-group">
-                <label for="common_name">Common Name:</label>
-                <input type="text" name="common_name" class="form-control" required><br>
-            </div>
-            <div class="form-group">
-                <label for="env">Env:</label>
-                <input type="text" name="env" class="form-control" required><br>
-            </div>
-            <div class="form-group">
-                <label for="passphase">Passphase:</label>
+                <label for="passphase">Password:</label>
                 <input type="password" name="passphase" class="form-control"><br>
             </div>
-            <div class="form-group form-check">
-                <input type="checkbox" name="multi" value="true" class="form-check-input">
-                <label for="multi">Multiple Domain?</label><br>
-            </div>
-            <div class="form-group">
-                <label for="domains">Enter multiple domains separated by commas:</label>
-                <input type="text" name="domains" class="form-control"><br>
-            </div>
-            <input type="submit" class="btn btn-primary" value="Generate Certificate Request">
+            <input type="submit" class="btn btn-primary" value="Add User">
     </div>
     </form>
     </div>

@@ -35,7 +35,17 @@ def create_table():
             common_name TEXT,
             token TEXT,
             data TEXT,
+            password TEXT,
             expiration_time INTEGER,
+            generated_date DATETIME
+        )
+    ''')
+    conn.commit()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE,
+            password TEXT,
             generated_date DATETIME
         )
     ''')
@@ -49,12 +59,20 @@ def insert_certificate(uid,common_name, env, csr_data, key_data, cnf_data):
     cursor.execute('INSERT INTO certificates (uid, common_name, env, csr_data, key_data, cnf_data, generated_date) VALUES (?, ?, ?, ?, ?, ?, ?)', (uid, common_name, env, csr_data, key_data, cnf_data, generated_date))
     conn.commit()
 
-def insert_tokens(common_name, token, data, expiration_time):
+def insert_tokens(common_name, token, data, password, expiration_time):
     # Insert a new certificate into the database
     conn = get_db_connection()
     cursor = conn.cursor()
     generated_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute('INSERT INTO tokens (common_name, token, data, expiration_time,generated_date) VALUES (?, ?, ?, ?, ?)', (common_name, token, data, expiration_time, generated_date))
+    cursor.execute('INSERT INTO tokens (common_name, token, data, password, expiration_time,generated_date) VALUES (?, ?, ?, ?, ?, ?)', (common_name, token, data, password, expiration_time, generated_date))
+    conn.commit()
+
+def insert_user(username, password):
+    # Insert a new certificate into the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    generated_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute('INSERT INTO admin_users (username, password, generated_date) VALUES (?, ?, ?)', (username, password, generated_date))
     conn.commit()
 
 def fetch_all_certificates():
@@ -78,11 +96,26 @@ def get_certificates(page_number, page_size):
     cursor.execute('SELECT id, uid, common_name, env, generated_date FROM certificates ORDER BY id DESC LIMIT ? OFFSET ?', (page_size, offset))
     return cursor.fetchall()
 
+def get_users(page_number, page_size):
+    # Retrieve a specific page of certificates from the database
+    offset = (page_number - 1) * page_size
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, username, generated_date FROM admin_users ORDER BY id DESC LIMIT ? OFFSET ?', (page_size, offset))
+    return cursor.fetchall()
+
 def get_total_certificate_count():
     # Count the total number of certificates in the database
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT COUNT(id) FROM certificates')
+    return cursor.fetchone()[0]
+
+def get_total_users_count():
+    # Count the total number of certificates in the database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(id) FROM admin_users')
     return cursor.fetchone()[0]
 
 # def execute_query(connection, query, params=None):
@@ -111,6 +144,12 @@ def delete_certificate_by_id(id):
     cursor.execute('DELETE FROM certificates WHERE id = ?',(str(id)))
     return conn.commit()
 
+def delete_user_by_id(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM admin_users WHERE id = ?',(str(id)))
+    return conn.commit()
+
 def get_certificate_by_id(id):
     # Retrieve a specific certificates from the database
     conn = get_db_connection()
@@ -122,6 +161,18 @@ def get_token_data(token):
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT common_name, token, data, expiration_time, generated_date FROM tokens WHERE token = ?',[token])
+    return cursor.fetchone()
+
+def get_guest_otp(otp):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id,expiration_time FROM tokens WHERE password = ?',[otp])
+    return cursor.fetchone()
+
+def get_user_pass(username):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT password FROM admin_users WHERE username = ?',[username])
     return cursor.fetchone()
 
 create_table()
