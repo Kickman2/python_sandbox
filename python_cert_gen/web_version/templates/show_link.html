@@ -20,17 +20,21 @@
     <div class="pb-4">
         <ul class="nav nav-tabs">
             <li class="nav-item" style="color: #f3f3f3;">
-                <a class="nav-link navbar-brand text-dark" href="#">CSR Generator</a>  
+                <a class="nav-link navbar-brand text-dark" href="#">CSR Generator</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-dark" href="{{ url_for('index')}}">Home</a>
+                <a class="nav-link text-dark" href="{{ url_for('index')}}">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-dark" href="{{ url_for('csr_list')}}">CSR List</a>
-          </ul>
+                <a class="nav-link text-dark" href="{{ url_for('csr_list')}}">CSR List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="{{ url_for('user_list')}}">User List</a>
+            </li>
+        </ul>
         </div>
     <h1>Download link</h1>
-    <p>This download link will only avaiable for 3 days.</p>
+    <p>This download link will only avaiable for 3 hours.</p>
     <p>{{ url }}</p>
     <p>Password: {{ otp }}</p>
 </body>

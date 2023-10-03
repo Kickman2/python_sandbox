@@ -42,7 +42,8 @@
     </div>
 
     <div class="container">
-        <a style="text-align: center;" href="{{ url_for('add_user') }}">
+        <div class="container d-flex pb-4 justify-content-center">
+        <a href="{{ url_for('add_user') }}">
             <button type="button" class="btn btn-success">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill-add" viewBox="0 0 16 16">
                     <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm.5-5v1h1a.5.5 0 0 1 0 1h-1v1a.5.5 0 0 1-1 0v-1h-1a.5.5 0 0 1 0-1h1v-1a.5.5 0 0 1 1 0Zm-2-6a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
@@ -51,15 +52,18 @@
                 Add User
             </button>
         </a>
+    </div>
         <table class="table table-striped table-hover table-sm">
             <thead>
                 <tr>
                     <th>User Name</th>
                     <th>Date</th>
+                    <th></th>
 
                 </tr>
             </thead>
             <tbody>
+                {% if users_data|length > 0 %}
                 {% for row in users_data %}
                 <tr>
                     <td>{{ row[1] }}</td>
@@ -80,6 +84,11 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="3">No Data</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>

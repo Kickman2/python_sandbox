@@ -17,7 +17,7 @@ app.secret_key = 'your_secret_key'  # Change this to a random secret key for ses
 auth = HTTPBasicAuth()
 
 def get_pass():
-    with open(".\.id", "r") as file:
+    with open(".id", "r") as file:
         lines = file.readlines()
         return base64.b64decode(lines[0]).decode('utf-8')
 
@@ -64,7 +64,7 @@ def verify_password(username, password):
     elif check_login(username,password):
         print("user ok")
         return True
-    elif username in users:
+    elif os.path.isfile(".id"):
         return check_password_hash(users.get(username), password)
     else: 
         return False

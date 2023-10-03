@@ -52,9 +52,11 @@
                     <th>CSR</th>
                     <th>CNF</th>
                     <th>Key</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
+                {% if csr_data|length > 0 %}
                 {% for row in csr_data %}
                 <tr>
                     <td>{{ row[1] }}</td>
@@ -98,6 +100,11 @@
                     </td>
                 </tr>
                 {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="8">No Data</td>
+                </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
